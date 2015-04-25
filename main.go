@@ -7,7 +7,6 @@ import (
     "io"
     "encoding/json"
     "os"
-    "strings"
 
     "github.com/bugsnag/bugsnag-go"
 )
@@ -34,10 +33,6 @@ type SpotifyLastTrackResponse struct {
     Track Track
 }
 
-func prefixString(prefix string, str string) string {
-    return strings.Join([]string {prefix, str}, "")
-}
-
 func GetLastTrack(username string) (Track, error) {
     url := fmt.Sprintf(LAST_FM_USER_NOW_API_URL, username)
     resp, err := http.Get(url)
@@ -59,8 +54,8 @@ func GetLastTrack(username string) (Track, error) {
         return Track{}, err
     }
 
-    r.Track.URL = prefixString(LAST_FM_URL, r.Track.URL)
-    r.Track.Artist.URL = prefixString(LAST_FM_URL, r.Track.Artist.URL)
+    r.Track.URL = LAST_FM_URL + r.Track.URL
+    r.Track.Artist.URL = LAST_FM_URL + r.Track.Artist.URL
 
     return r.Track, nil
 }
@@ -97,5 +92,5 @@ func main() {
     http.HandleFunc("/spotify", bugsnag.HandlerFunc(GetSpotify))
     http.HandleFunc("/last.fm", bugsnag.HandlerFunc(GetLastFm))
 
-    http.ListenAndServe(prefixString(":", os.Getenv("PORT")), nil)
+    http.ListenAndServe(":" + os.Getenv("PORT"), nil)
 }
