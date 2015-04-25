@@ -33,7 +33,7 @@ type SpotifyLastTrackResponse struct {
 }
 
 func prefixString(prefix string, str string) string {
-    return strings.Join([]string {prefix, string}, "")
+    return strings.Join([]string {prefix, str}, "")
 }
 
 func GetLastTrack(username string) (Track, error) {
