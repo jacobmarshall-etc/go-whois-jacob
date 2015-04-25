@@ -19,45 +19,48 @@ const (
 )
 
 type Artist struct {
-    Name string `json:"name"`
-    URL string `json:"url"`
+    Name string
+    URL string
 }
 
 type Track struct {
-    Name string `json:"name"`
-    Artist Artist `json:"artist"`
-    URL string `json:"url"`
+    Name string
+    Artist Artist
+    URL string
 }
 
-type SpotifyLastTrackResponse struct {
+type LastTrack struct {
     Track Track
+    NowPlaying bool
+    UTC int
 }
 
-func GetLastTrack(username string) (Track, error) {
+func GetLastTrack(username string) (LastTrack, error) {
+    l := LastTrack{}
+
     url := fmt.Sprintf(LAST_FM_USER_NOW_API_URL, username)
     resp, err := http.Get(url)
 
     if err != nil {
         log.Printf("Error while fetching last track for user %s - %s", username, err)
 
-        return Track{}, err
+        return l, err
     }
 
     defer resp.Body.Close()
 
-    r := new(SpotifyLastTrackResponse)
-    err = json.NewDecoder(resp.Body).Decode(r)
+    err = json.NewDecoder(resp.Body).Decode(&l)
 
     if err != nil {
         log.Printf("Error decoding response to response - %s", err)
 
-        return Track{}, err
+        return l, err
     }
 
-    r.Track.URL = LAST_FM_URL + r.Track.URL
-    r.Track.Artist.URL = LAST_FM_URL + r.Track.Artist.URL
+    l.Track.URL = LAST_FM_URL + l.Track.URL
+    l.Track.Artist.URL = LAST_FM_URL + l.Track.Artist.URL
 
-    return r.Track, nil
+    return l, nil
 }
 
 func GetSpotify(w http.ResponseWriter, r *http.Request) {
