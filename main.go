@@ -8,6 +8,8 @@ import (
     "encoding/json"
     "os"
     "strings"
+
+    "github.com/bugsnag/bugsnag-go"
 )
 
 var username string = os.Getenv("SPOTIFY_USERNAME")
@@ -74,6 +76,10 @@ func GetLastFm(w http.ResponseWriter, r *http.Request) {
 
     if err != nil {
         http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+
+        // Sent the bugsnag error after the response
+        // Not sure if this has any effect of page load time, we'll see...
+        bugsnag.Notify(err)
         return
     }
 
@@ -83,8 +89,13 @@ func GetLastFm(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-    http.HandleFunc("/spotify", GetSpotify)
-    http.HandleFunc("/last.fm", GetLastFm)
+    bugsnag.Configure(bugsnag.Configuration{
+        APIKey: os.Getenv("BUGSNAG_API_KEY"),
+        ReleaseStage: os.Getenv("BUGSNAG_RELEASE_STAGE"),
+    })
+
+    http.HandleFunc("/spotify", bugsnag.HandlerFunc(GetSpotify))
+    http.HandleFunc("/last.fm", bugsnag.HandlerFunc(GetLastFm))
 
     http.ListenAndServe(prefixString(":", os.Getenv("PORT")), nil)
 }
