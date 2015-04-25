@@ -55,15 +55,11 @@ func GetSpotify(w http.ResponseWriter, r *http.Request) {
     track, err := GetLastTrack(username)
 
     if err != nil {
-        io.WriteString(w, "{}")
+        http.Error(w, "Internal Server Error", http.StatusInternalServerError)
         return
     }
 
-    data, err := json.Marshal(track)
-
-    if err != nil {
-        log.Printf("Error encoding JSON track - %s", err)
-    }
+    data, _ := json.Marshal(track)
 
     io.WriteString(w, string(data))
 }
