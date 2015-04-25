@@ -64,6 +64,10 @@ func GetLastTrack(username string) (Track, error) {
 }
 
 func GetSpotify(w http.ResponseWriter, r *http.Request) {
+    http.Redirect(w, r, "/last.fm", 301);
+}
+
+func GetLastFm(w http.ResponseWriter, r *http.Request) {
     w.Header().Add("Access-Control-Allow-Origin", "*")
 
     track, err := GetLastTrack(username)
@@ -80,6 +84,7 @@ func GetSpotify(w http.ResponseWriter, r *http.Request) {
 
 func main() {
     http.HandleFunc("/spotify", GetSpotify)
+    http.HandleFunc("/last.fm", GetLastFm)
 
     http.ListenAndServe(prefixString(":", os.Getenv("PORT")), nil)
 }
