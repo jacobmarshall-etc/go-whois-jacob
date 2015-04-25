@@ -52,6 +52,8 @@ func GetLastTrack(username string) (Track, error) {
 }
 
 func GetSpotify(w http.ResponseWriter, r *http.Request) {
+    w.Header().Add("Access-Control-Allow-Origin", "*")
+
     track, err := GetLastTrack(username)
 
     if err != nil {
