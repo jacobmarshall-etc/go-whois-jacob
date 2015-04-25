@@ -12,6 +12,11 @@ import (
 
 var username string = os.Getenv("SPOTIFY_USERNAME")
 
+const (
+    LAST_FM_URL = "http://last.fm"
+    LAST_FM_USER_NOW_API_URL = "http://ajax.last.fm/user/%s/now"
+)
+
 type Artist struct {
     Name string `json:"name"`
     URL string `json:"url"`
@@ -27,8 +32,12 @@ type SpotifyLastTrackResponse struct {
     Track Track
 }
 
+func prefixString(prefix string, str string) string {
+    return strings.Join([]string {prefix, string}, "")
+}
+
 func GetLastTrack(username string) (Track, error) {
-    url := fmt.Sprintf("http://ajax.last.fm/user/%s/now", username)
+    url := fmt.Sprintf(LAST_FM_USER_NOW_API_URL, username)
     resp, err := http.Get(url)
 
     if err != nil {
@@ -47,6 +56,9 @@ func GetLastTrack(username string) (Track, error) {
 
         return Track{}, err
     }
+
+    r.Track.URL = prefixString(LAST_FM_URL, r.Track.URL)
+    r.Track.Artist.URL = prefixString(LAST_FM_URL, r.Track.Artist.URL)
 
     return r.Track, nil
 }
@@ -69,6 +81,5 @@ func GetSpotify(w http.ResponseWriter, r *http.Request) {
 func main() {
     http.HandleFunc("/spotify", GetSpotify)
 
-    http.ListenAndServe(strings.Join(
-        []string {":", os.Getenv("PORT")}, ""), nil)
+    http.ListenAndServe(prefixString(":", os.Getenv("PORT")), nil)
 }
